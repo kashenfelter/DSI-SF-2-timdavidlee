@@ -42,7 +42,7 @@ class KNNBoundaryPlotter(object):
         v2_min, v2_max = np.min(self.X[:,1]), np.max(self.X[:,1])
 
         # get the range of each variable
-        v1_range = v1_max - v2_min
+        v1_range = v1_max - v1_min
         v2_range = v2_max - v2_min
 
         # set up the min and max ranges of the axes of the plot
@@ -55,10 +55,11 @@ class KNNBoundaryPlotter(object):
 
         # use the numpy meshgrid function to make a bunch of points across the range
         # of values.
-        self.xx, self.yy = np.meshgrid(np.arange(self.x_min, self.x_max,
-                                                 (v1_range/self.granularity)),
-                                       np.arange(self.y_min, self.y_max,
-                                                 (v2_range/self.granularity)))
+
+        self.xx, self.yy = np.meshgrid(np.linspace(self.x_min, self.x_max,
+                                                   self.granularity),
+                                       np.linspace(self.y_min, self.y_max,
+                                                   self.granularity))
 
         # meshgrids:
         self.Zs = {'uniform':{},
@@ -82,6 +83,16 @@ class KNNBoundaryPlotter(object):
             Z = Z.reshape(self.xx.shape)
             self.Zs['distance'][nn] = Z
 
+        if len(np.unique(self.X[:,0]))+50 < self.X.shape[0]:
+            self.v1_points = self.rand_jitter(self.X[:,0])
+        else:
+            self.v1_points = self.X[:,0]
+
+        if len(np.unique(self.X[:,1]))+50 < self.X.shape[0]:
+            self.v2_points = self.rand_jitter(self.X[:,1])
+        else:
+            self.v2_points = self.X[:,1]
+
 
     def knn_mesh_runner(self):
 
@@ -91,6 +102,9 @@ class KNNBoundaryPlotter(object):
 
         self.knn_mesh_fitter()
 
+    def rand_jitter(self, array):
+        stdev = .03*(np.max(array)-np.min(array))
+        return array + np.random.randn(len(array)) * stdev
 
     # MOST OF THIS FUNCTION STUFF LIFTED FROM SCIKIT-LEARN EXAMPLE!
     # see:
@@ -106,9 +120,6 @@ class KNNBoundaryPlotter(object):
         # the knn boundary of where it predicts between one class and another!
         Z = self.Zs[weights][nn]
 
-        # get out the values of our two predictors and class target variable
-        v1_points = self.df[self.var1].values
-        v2_points = self.df[self.var2].values
         point_colors = [self.point_colors[y_] for y_ in self.y]
 
         # Set the figure size to be big enough to see stuff
@@ -119,7 +130,7 @@ class KNNBoundaryPlotter(object):
         plt.pcolormesh(self.xx, self.yy, Z, cmap=colormap)
 
         # Plot the actual points of the 2 predictor variables
-        plt.scatter(v1_points, v2_points, c=point_colors, s=self.dotsize)
+        plt.scatter(self.v1_points, self.v2_points, c=point_colors, s=self.dotsize)
 
         # set the axis limits:
         plt.xlim(self.x_min, self.x_max)
