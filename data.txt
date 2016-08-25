@@ -1,0 +1,1 @@
+{"search_metadata": {"count": 100, "completed_in": 0.027, "max_id_str": "766895714446090240", "since_id_str": "0", "refresh_url": "?since_id=766895714446090240&q=%23ASC2016%26max_id%3D763530440934391808&include_entities=1", "since_id": 0, "query": "%23ASC2016%26max_id%3D763530440934391808", "max_id": 766895714446090240}, "statuses": []}
